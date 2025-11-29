@@ -15,7 +15,7 @@ final class MainInteractorTests: XCTestCase {
         var shouldReturnError = false
         var fetchCalled = false
 
-        func fetchTodos(completion: @escaping (Result<TodoResponse, NetworkError>) -> Void) {
+        func fetchTodos(completion: @escaping (Result<ApiTodoResponse, NetworkError>) -> Void) {
             fetchCalled = true
 
             if shouldReturnError {
@@ -24,7 +24,7 @@ final class MainInteractorTests: XCTestCase {
                 let todos = [
                     Todo(id: 1, todo: "Test", completed: false, userId: nil)
                 ]
-                let response = TodoResponse(
+                let response = ApiTodoResponse(
                     todos: todos,
                     total: 1,
                     skip: 0,

@@ -7,9 +7,17 @@
 
 import Foundation
 
-public struct Todo: Codable, Identifiable {
+public struct ApiTodo: Codable, Identifiable {
     public let id: Int
     public let todo: String
     public let completed: Bool
     public let userId: Int?
+}
+
+public struct AppTodo: Identifiable {
+    public let id: Int
+    public let title: String
+    public let description: String
+    public let completed: Bool
+    public let createdAt: Date
 }

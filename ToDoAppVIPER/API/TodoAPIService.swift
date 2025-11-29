@@ -16,7 +16,7 @@ public final class TodoAPIService: TodoAPIServiceProtocol {
         self.session = session
     }
     
-    public func fetchTodos(completion: @escaping (Result<TodoResponse, NetworkError>) -> Void) {
+    public func fetchTodos(completion: @escaping (Result<ApiTodoResponse, NetworkError>) -> Void) {
         guard let url = URL(string: API.baseURL + API.Endpoints.todos) else {
             DispatchQueue.main.async { completion(.failure(.badURL)) }
             return
@@ -48,7 +48,7 @@ public final class TodoAPIService: TodoAPIServiceProtocol {
                     do {
                         let decoder = JSONDecoder()
                         decoder.keyDecodingStrategy = .convertFromSnakeCase
-                        let todosResponse = try decoder.decode(TodoResponse.self, from: data)
+                        let todosResponse = try decoder.decode(ApiTodoResponse.self, from: data)
                         completion(.success(todosResponse))
                     } catch {
                         completion(.failure(.decodingError(error)))

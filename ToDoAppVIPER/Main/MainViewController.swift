@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MainViewProtocol: AnyObject {
-    func showTodos(_ todos: [Todo])
+    func showTodos(_ todos: [AppTodo])
     func showError(_ message: String)
 }
 
@@ -17,7 +17,7 @@ final class MainViewController: UIViewController {
     var presenter: MainPresenterProtocol!
 
     private let tableView = UITableView()
-    private var todos: [Todo] = []
+    private var todos: [AppTodo] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,7 +37,7 @@ final class MainViewController: UIViewController {
 }
 
 extension MainViewController: MainViewProtocol {
-    func showTodos(_ todos: [Todo]) {
+    func showTodos(_ todos: [AppTodo]) {
         self.todos = todos
         tableView.reloadData()
     }
@@ -56,7 +56,7 @@ extension MainViewController: UITableViewDataSource {
                    cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         let todo = todos[indexPath.row]
-        cell.textLabel?.text = todo.todo
+        cell.textLabel?.text = todo.title
         cell.detailTextLabel?.text = "completed: \(todo.completed)"
         return cell
     }

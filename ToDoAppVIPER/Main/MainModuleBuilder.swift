@@ -12,7 +12,15 @@ final class MainModuleBuilder {
     static func build() -> UIViewController {
         let view = MainViewController()
         let router = MainRouter()
-        let interactor = MainInteractor(service: TodoAPIService())
+
+        let apiService = TodoAPIService()
+        let coreData = CoreDataService.shared
+
+        let interactor = MainInteractor(
+            apiService: apiService,
+            coreData: coreData
+        )
+
         let presenter = MainPresenter(
             view: view,
             interactor: interactor,

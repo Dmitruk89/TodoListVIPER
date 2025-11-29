@@ -31,7 +31,7 @@ final class MainPresenter: MainPresenterProtocol {
 }
 
 extension MainPresenter: MainInteractorOutput {
-    func didLoadTodos(_ todos: [Todo]) {
+    func didLoadTodos(_ todos: [AppTodo]) {
         view?.showTodos(todos)
     }
 

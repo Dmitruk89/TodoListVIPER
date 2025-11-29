@@ -8,5 +8,5 @@
 import Foundation
 
 public protocol TodoAPIServiceProtocol {
-    func fetchTodos(completion: @escaping (Result<TodoResponse, NetworkError>) -> Void)
+    func fetchTodos(completion: @escaping (Result<ApiTodoResponse, NetworkError>) -> Void)
 }
