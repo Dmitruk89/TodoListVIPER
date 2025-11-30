@@ -30,14 +30,10 @@ final class MainInteractor: MainInteractorProtocol {
     }
     
     func loadTodos() {
-        coreData.isEmpty { [weak self] isEmpty in
-            guard let self = self else { return }
-            
-            if isEmpty {
-                self.loadFromAPIAndSaveToCoreData()
-            } else {
-                self.loadFromCoreData()
-            }
+        if AppLaunchUtility.isFirstLaunch() {
+            self.loadFromAPIAndSaveToCoreData()
+        } else {
+            self.loadFromCoreData()
         }
     }
     

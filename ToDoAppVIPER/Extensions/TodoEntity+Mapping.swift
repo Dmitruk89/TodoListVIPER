@@ -21,7 +21,7 @@ extension TodoEntity {
     
     func update(from apiTodo: ApiTodo) {
         self.id = Int64(apiTodo.id)
-        self.title = "Задача \(apiTodo.id)"
+        self.title = "Задача \(apiTodo.id). \(apiTodo.todo)"
         self.desc = apiTodo.todo
         self.completed = apiTodo.completed
         

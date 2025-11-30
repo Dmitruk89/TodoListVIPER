@@ -66,62 +66,81 @@ final class MainInteractorTests: XCTestCase {
             loadedError = error
         }
     }
-
-    func test_loadTodos_fromAPI_whenCoreDataEmpty() {
+    
+    override func setUp() {
+        super.setUp()
+        AppLaunchUtility.isFirstLaunchOverride = nil
+        UserDefaults.standard.removeObject(forKey: "hasLaunchedBefore")
+    }
+    
+    func test_loadTodos_onFirstLaunch_callsAPIAndSaves() {
+        AppLaunchUtility.isFirstLaunchOverride = true
+        
         let apiService = MockAPIService()
         let coreData = MockCoreDataService()
-        coreData.isEmptyValue = true
 
         let interactor = MainInteractor(apiService: apiService, coreData: coreData)
         let output = MockOutput()
         interactor.output = output
 
-        let expectation = XCTestExpectation(description: "Load todos from API")
+        let expectation = XCTestExpectation(description: "Load todos from API on first launch")
+
         interactor.loadTodos()
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertTrue(apiService.fetchCalled)
-            XCTAssertTrue(coreData.saveCalled)
+            XCTAssertTrue(apiService.fetchCalled, "Expected API call on first launch.")
+            XCTAssertTrue(coreData.saveCalled, "Expected saving to CoreData.")
             XCTAssertEqual(output.loadedTodos?.count, 1)
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
     }
-
-    func test_loadTodos_fromCoreData_whenNotEmpty() {
+    
+    func test_loadTodos_onSubsequentLaunch_callsCoreDataOnly() {
+        AppLaunchUtility.isFirstLaunchOverride = false
+        
         let apiService = MockAPIService()
         let coreData = MockCoreDataService()
-        coreData.isEmptyValue = false
-        coreData.todosToReturn = [AppTodo(id: 10, title: "CoreData Task", description: "", completed: false, createdAt: Date())]
-
+        
+        coreData.todosToReturn = [AppTodo(id: 10, title: "CoreData Task", description: "Task description", completed: false, createdAt: Date())]
+        
         let interactor = MainInteractor(apiService: apiService, coreData: coreData)
         let output = MockOutput()
         interactor.output = output
-
-        let expectation = XCTestExpectation(description: "Load todos from CoreData")
+        
+        let expectation = XCTestExpectation(description: "Load todos from CoreData on subsequent launch")
+        
         interactor.loadTodos()
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            XCTAssertFalse(apiService.fetchCalled)
-            XCTAssertTrue(coreData.fetchTodosCalled)
+            XCTAssertFalse(apiService.fetchCalled, "API should not be called on subsequent launches.")
+            XCTAssertTrue(coreData.fetchTodosCalled, "Expected CoreData fetchTodos call.")
             XCTAssertEqual(output.loadedTodos?.first?.id, 10)
+            XCTAssertFalse(coreData.saveCalled, "Saving should not be called.")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
     }
-
-    func test_loadTodos_APIError_passesErrorToOutput() {
+    
+    func test_loadTodos_APIError_passesErrorToOutput_onFirstLaunch() {
+        AppLaunchUtility.isFirstLaunchOverride = true
+        
         let apiService = MockAPIService()
         apiService.shouldReturnError = true
         let coreData = MockCoreDataService()
-        coreData.isEmptyValue = true
 
         let interactor = MainInteractor(apiService: apiService, coreData: coreData)
         let output = MockOutput()
         interactor.output = output
 
         let expectation = XCTestExpectation(description: "Load todos from API with error")
+
         interactor.loadTodos()
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            XCTAssertTrue(apiService.fetchCalled)
             XCTAssertNotNil(output.loadedError)
+            XCTAssertFalse(coreData.fetchTodosCalled, "CoreData fetch should not be called after API error.")
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 1)
