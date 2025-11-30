@@ -11,10 +11,10 @@ import XCTest
 final class MainPresenterTests: XCTestCase {
 
     final class MockView: MainViewProtocol {
-        var shownTodos: [Todo]?
+        var shownTodos: [AppTodo]?
         var shownError: String?
 
-        func showTodos(_ todos: [Todo]) {
+        func showTodos(_ todos: [AppTodo]) {
             shownTodos = todos
         }
 
@@ -62,14 +62,16 @@ final class MainPresenterTests: XCTestCase {
         )
 
         let todos = [
-            Todo(id: 1, todo: "Test1", completed: false, userId: 1),
-            Todo(id: 2, todo: "Test2", completed: true, userId: nil)
+            AppTodo(id: 1, title: "Test1", description: "Desc1", completed: false, createdAt: Date()),
+            AppTodo(id: 2, title: "Test2", description: "Desc2", completed: true, createdAt: Date())
         ]
 
         presenter.didLoadTodos(todos)
 
         XCTAssertEqual(view.shownTodos?.count, 2,
                        "Presenter should forward loaded todos to the view")
+        XCTAssertEqual(view.shownTodos?.first?.id, 1)
+        XCTAssertEqual(view.shownTodos?.last?.completed, true)
     }
 
     func test_didFailLoadingTodos_callsViewShowError() {
