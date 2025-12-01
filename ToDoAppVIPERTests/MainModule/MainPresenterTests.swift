@@ -92,4 +92,79 @@ final class MainPresenterTests: XCTestCase {
         XCTAssertEqual(view.shownError, errorMessage,
                        "Presenter should pass error messages to the view")
     }
+    
+    // MARK: - Filtering Tests
+
+    func makePresenterWithLoadedTodos(_ todos: [AppTodo]) -> (MainPresenter, MockView) {
+        let view = MockView()
+        let interactor = MockInteractor()
+        let router = MockRouter()
+
+        let presenter = MainPresenter(
+            view: view,
+            interactor: interactor,
+            router: router
+        )
+
+        presenter.didLoadTodos(todos)
+        return (presenter, view)
+    }
+
+    func test_filterTodos_byTitle() {
+        let todos = [
+            AppTodo(id: 1, title: "Buy milk", description: "Groceries", completed: false, createdAt: Date()),
+            AppTodo(id: 2, title: "Walk dog", description: "Daily", completed: false, createdAt: Date())
+        ]
+
+        let (presenter, view) = makePresenterWithLoadedTodos(todos)
+
+        presenter.filterTodos(with: "milk")
+
+        XCTAssertEqual(view.shownTodos?.count, 1)
+        XCTAssertEqual(view.shownTodos?.first?.id, 1)
+    }
+
+    func test_filterTodos_byDescription() {
+        let todos = [
+            AppTodo(id: 1, title: "Task 1", description: "Clean kitchen", completed: false, createdAt: Date()),
+            AppTodo(id: 2, title: "Task 2", description: "Wash car", completed: false, createdAt: Date())
+        ]
+
+        let (presenter, view) = makePresenterWithLoadedTodos(todos)
+
+        presenter.filterTodos(with: "kitchen")
+
+        XCTAssertEqual(view.shownTodos?.count, 1)
+        XCTAssertEqual(view.shownTodos?.first?.id, 1)
+    }
+
+    func test_filterTodos_byDateFormattedString() {
+        let date = Date()
+        let dateString = DateUtility.formatShortDate(date) // используется твой формат
+
+        let todos = [
+            AppTodo(id: 1, title: "A", description: "B", completed: false, createdAt: date),
+            AppTodo(id: 2, title: "C", description: "D", completed: false, createdAt: date.addingTimeInterval(-86400))
+        ]
+
+        let (presenter, view) = makePresenterWithLoadedTodos(todos)
+
+        presenter.filterTodos(with: dateString)
+
+        XCTAssertEqual(view.shownTodos?.count, 1)
+        XCTAssertEqual(view.shownTodos?.first?.id, 1)
+    }
+
+    func test_filterTodos_emptyQuery_returnsAllTodos() {
+        let todos = [
+            AppTodo(id: 1, title: "Task 1", description: "Desc1", completed: false, createdAt: Date()),
+            AppTodo(id: 2, title: "Task 2", description: "Desc2", completed: false, createdAt: Date())
+        ]
+
+        let (presenter, view) = makePresenterWithLoadedTodos(todos)
+
+        presenter.filterTodos(with: "")
+
+        XCTAssertEqual(view.shownTodos?.count, 2)
+    }
 }
