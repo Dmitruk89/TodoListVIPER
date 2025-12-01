@@ -14,6 +14,8 @@ public protocol CoreDataServiceProtocol {
     func fetchTodos(completion: @escaping (Result<[AppTodo], Error>) -> Void)
     
     func saveTodosFromAPI(_ apiTodos: [ApiTodo], completion: @escaping (Result<Void, Error>) -> Void)
+    
+    func updateTodo(_ todo: AppTodo, completion: @escaping (Result<AppTodo, Error>) -> Void)
 }
 
 public final class CoreDataService: CoreDataServiceProtocol {
@@ -83,6 +85,42 @@ public final class CoreDataService: CoreDataServiceProtocol {
                 DispatchQueue.main.async { completion(.success(())) }
             } catch {
                 DispatchQueue.main.async { completion(.failure(error)) }
+            }
+        }
+    }
+    
+    public func updateTodo(_ todo: AppTodo, completion: @escaping (Result<AppTodo, Error>) -> Void) {
+        
+        container.performBackgroundTask { bgContext in
+            let fetch: NSFetchRequest<TodoEntity> = TodoEntity.fetchRequest()
+            fetch.predicate = NSPredicate(format: "id == %d", todo.id)
+            fetch.fetchLimit = 1
+
+            do {
+                guard let entity = try bgContext.fetch(fetch).first else {
+                    let err = NSError(domain: "CoreData", code: 404,
+                                      userInfo: [NSLocalizedDescriptionKey: "Todo not found"])
+                    DispatchQueue.main.async { completion(.failure(err)) }
+                    return
+                }
+
+                entity.title = todo.title
+                entity.desc = todo.description
+                entity.completed = todo.completed
+                entity.createdAt = todo.createdAt
+
+                try bgContext.save()
+
+                let updated = entity.toAppTodo()
+
+                DispatchQueue.main.async {
+                    completion(.success(updated))
+                }
+
+            } catch {
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
             }
         }
     }

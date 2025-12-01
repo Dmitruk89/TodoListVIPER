@@ -16,8 +16,8 @@ public struct ApiTodo: Codable, Identifiable {
 
 public struct AppTodo: Identifiable {
     public let id: Int
-    public let title: String
-    public let description: String
-    public let completed: Bool
+    public var title: String
+    public var description: String
+    public var completed: Bool
     public let createdAt: Date
 }

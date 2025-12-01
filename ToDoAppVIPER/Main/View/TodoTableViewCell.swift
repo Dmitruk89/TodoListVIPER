@@ -8,10 +8,18 @@
 
 import UIKit
 
+protocol TodoTableViewCellDelegate: AnyObject {
+    func todoCellDidToggleStatus(_ cell: TodoTableViewCell)
+}
+
 final class TodoTableViewCell: UITableViewCell {
     
     static let reuseIdentifier = "TodoTableViewCell"
-
+    
+    weak var delegate: TodoTableViewCellDelegate?
+    
+    private var currentTodo: AppTodo?
+    
     private let statusIndicator = UIImageView()
     
     private let titleLabel: UILabel = {
@@ -42,10 +50,21 @@ final class TodoTableViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         contentView.backgroundColor = DSColor.darkBackground
         setupLayout()
+        setupActions()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupActions() {
+        statusIndicator.isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer(target: self, action: #selector(statusTapped))
+        statusIndicator.addGestureRecognizer(tap)
+    }
+    
+    @objc private func statusTapped() {
+        delegate?.todoCellDidToggleStatus(self)
     }
 
     private func setupLayout() {
@@ -83,6 +102,7 @@ final class TodoTableViewCell: UITableViewCell {
         
         let statusImageName = todo.completed ? DSStatusIcon.completed : DSStatusIcon.pending
         statusIndicator.image = UIImage(systemName: statusImageName)
+        currentTodo = todo
     }
     
     override func prepareForReuse() {

@@ -10,6 +10,7 @@ import UIKit
 protocol MainViewProtocol: AnyObject {
     func showTodos(_ todos: [AppTodo])
     func showError(_ message: String)
+    func updateTodo(_ todo: AppTodo)
 }
 
 final class MainViewController: UIViewController {
@@ -90,6 +91,12 @@ extension MainViewController: MainViewProtocol {
     func showError(_ message: String) {
         print("❌ Error: \(message)")
     }
+    
+    func updateTodo(_ todo: AppTodo) {
+        guard let index = todos.firstIndex(where: { $0.id == todo.id }) else { return }
+        todos[index] = todo
+        tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+    }
 }
 
 extension MainViewController: TodoSearchBarDelegate {
@@ -111,7 +118,7 @@ extension MainViewController: UITableViewDataSource {
         }
         
         let todo = todos[indexPath.row]
-        
+        cell.delegate = self 
         cell.configure(with: todo)
         cell.selectionStyle = .none
         
@@ -154,5 +161,21 @@ extension MainViewController: UITableViewDelegate {
         return .withPreview(preview) {
             self.makeContextMenu(for: todo)
         }
+    }
+}
+
+extension MainViewController: TodoTableViewCellDelegate {
+    func todoCellDidToggleStatus(_ cell: TodoTableViewCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        
+        let oldTodo = todos[indexPath.row]
+
+        var updatedTodo = oldTodo
+        updatedTodo.completed.toggle()
+
+        todos[indexPath.row] = updatedTodo
+        cell.configure(with: updatedTodo)
+
+        presenter.updateTodo(updatedTodo)
     }
 }

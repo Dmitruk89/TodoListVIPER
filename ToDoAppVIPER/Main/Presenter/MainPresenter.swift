@@ -8,6 +8,7 @@
 protocol MainPresenterProtocol: AnyObject {
     func viewDidLoad()
     func filterTodos(with query: String)
+    func updateTodo(_ todo: AppTodo)
 }
 
 final class MainPresenter: MainPresenterProtocol {
@@ -30,6 +31,10 @@ final class MainPresenter: MainPresenterProtocol {
 
     func viewDidLoad() {
         interactor.loadTodos()
+    }
+    
+    func updateTodo(_ todo: AppTodo) {
+        interactor.updateTodo(todo)
     }
     
     func filterTodos(with query: String) {
@@ -57,6 +62,17 @@ extension MainPresenter: MainInteractorOutput {
     }
 
     func didFailLoadingTodos(_ error: String) {
+        view?.showError(error)
+    }
+    
+    func didUpdateTodo(_ todo: AppTodo) {
+        if let idx = allTodos.firstIndex(where: { $0.id == todo.id }) {
+            allTodos[idx] = todo
+        }
+        view?.updateTodo(todo)
+    }
+    
+    func didFailUpdatingTodo(_ error: String) {
         view?.showError(error)
     }
 }

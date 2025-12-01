@@ -9,11 +9,15 @@ import Foundation
 
 protocol MainInteractorProtocol {
     func loadTodos()
+    func updateTodo(_ todo: AppTodo)
 }
 
 protocol MainInteractorOutput: AnyObject {
     func didLoadTodos(_ todos: [AppTodo])
     func didFailLoadingTodos(_ error: String)
+    
+    func didUpdateTodo(_ todo: AppTodo)
+    func didFailUpdatingTodo(_ error: String)
 }
 
 final class MainInteractor: MainInteractorProtocol {
@@ -65,6 +69,17 @@ final class MainInteractor: MainInteractorProtocol {
                 
             case .failure(let error):
                 self.output?.didFailLoadingTodos(error.localizedDescription)
+            }
+        }
+    }
+    
+    func updateTodo(_ todo: AppTodo) {
+        coreData.updateTodo(todo) { [weak self] result in
+            switch result {
+            case .success(let updated):
+                self?.output?.didUpdateTodo(updated)
+            case .failure(let error):
+                self?.output?.didFailUpdatingTodo(error.localizedDescription)
             }
         }
     }
