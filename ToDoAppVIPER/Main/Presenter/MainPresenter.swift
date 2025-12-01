@@ -7,6 +7,7 @@
 
 protocol MainPresenterProtocol: AnyObject {
     func viewDidLoad()
+    func filterTodos(with query: String)
 }
 
 final class MainPresenter: MainPresenterProtocol {
@@ -15,6 +16,8 @@ final class MainPresenter: MainPresenterProtocol {
     private let interactor: MainInteractorProtocol
     private let router: MainRouterProtocol
 
+    private var allTodos: [AppTodo] = []
+    
     init(
         view: MainViewProtocol,
         interactor: MainInteractorProtocol,
@@ -28,10 +31,28 @@ final class MainPresenter: MainPresenterProtocol {
     func viewDidLoad() {
         interactor.loadTodos()
     }
+    
+    func filterTodos(with query: String) {
+        guard !query.isEmpty else {
+            view?.showTodos(allTodos)
+            return
+        }
+        
+        let lowercasedQuery = query.lowercased()
+        let filtered = allTodos.filter { todo in
+            let dateString = DateUtility.formatShortDate(todo.createdAt).lowercased()
+            return todo.title.lowercased().contains(lowercasedQuery) ||
+            (todo.description.lowercased().contains(lowercasedQuery)) ||
+                   dateString.contains(lowercasedQuery)
+        }
+        
+        view?.showTodos(filtered)
+    }
 }
 
 extension MainPresenter: MainInteractorOutput {
     func didLoadTodos(_ todos: [AppTodo]) {
+        allTodos = todos
         view?.showTodos(todos)
     }
 

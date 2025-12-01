@@ -16,18 +16,7 @@ final class MainViewController: UIViewController {
     
     var presenter: MainPresenterProtocol!
     
-    private let searchBar: UISearchBar = {
-        let bar = UISearchBar()
-        bar.placeholder = DSSearchBar.placeholder
-        bar.searchBarStyle = DSSearchBar.style
-        bar.translatesAutoresizingMaskIntoConstraints = false
-        
-        if let textField = bar.value(forKey: "searchField") as? UITextField {
-            textField.textColor = DSSearchBar.textColor
-        }
-        return bar
-    }()
-    
+    private let searchBarView = TodoSearchBarView()
     private let tableView = UITableView()
     private var todos: [AppTodo] = []
     
@@ -39,7 +28,7 @@ final class MainViewController: UIViewController {
         
         setupNavigationBarAppearance()
         setupViewsAndConstraints()
-        
+        searchBarView.delegate = self
         presenter.viewDidLoad()
     }
     
@@ -65,7 +54,7 @@ final class MainViewController: UIViewController {
     }
     
     private func setupViewsAndConstraints() {
-        view.addSubview(searchBar)
+        view.addSubview(searchBarView)
         
         tableView.register(TodoTableViewCell.self, forCellReuseIdentifier: TodoTableViewCell.reuseIdentifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -78,12 +67,12 @@ final class MainViewController: UIViewController {
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
-            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            searchBar.heightAnchor.constraint(equalToConstant: DSSearchBar.height),
+            searchBarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            searchBarView.heightAnchor.constraint(equalToConstant: DSSearchBar.height),
             
-            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: DSSpacing.vertical),
+            tableView.topAnchor.constraint(equalTo: searchBarView.bottomAnchor, constant: DSSpacing.vertical),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -100,6 +89,12 @@ extension MainViewController: MainViewProtocol {
     
     func showError(_ message: String) {
         print("❌ Error: \(message)")
+    }
+}
+
+extension MainViewController: TodoSearchBarDelegate {
+    func searchBar(_ searchBar: TodoSearchBarView, didUpdateQuery query: String) {
+        presenter.filterTodos(with: query)
     }
 }
 
