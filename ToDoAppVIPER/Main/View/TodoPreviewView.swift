@@ -22,31 +22,31 @@ final class TodoPreviewView: UIView {
     required init?(coder: NSCoder) { fatalError() }
 
     private func setupUI() {
-        backgroundColor = UIColor(white: 0.15, alpha: 1)
+        backgroundColor = DSColor.background
 
-        titleLabel.font = .preferredFont(forTextStyle: .headline)
+        titleLabel.font = DSTypography.headline
         titleLabel.numberOfLines = 0
-        titleLabel.textColor = .white
+        titleLabel.textColor = DSColor.primaryText
 
-        detailLabel.font = .preferredFont(forTextStyle: .subheadline)
+        detailLabel.font = DSTypography.subheadline
         detailLabel.numberOfLines = 0
-        detailLabel.textColor = .white
+        detailLabel.textColor = DSColor.primaryText
 
-        dateLabel.font = .preferredFont(forTextStyle: .footnote)
-        dateLabel.textColor = .lightGray
+        dateLabel.font = DSTypography.footnote
+        dateLabel.textColor = DSColor.secondaryText
 
         let stack = UIStackView(arrangedSubviews: [titleLabel, detailLabel, dateLabel])
         stack.axis = .vertical
-        stack.spacing = 6
+        stack.spacing = DSSpacing.medium
 
         addSubview(stack)
         stack.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
-            stack.topAnchor.constraint(equalTo: topAnchor, constant: 16),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16)
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: DSSpacing.horizontal),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -DSSpacing.horizontal),
+            stack.topAnchor.constraint(equalTo: topAnchor, constant: DSSpacing.medium),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -DSSpacing.medium)
         ])
     }
 

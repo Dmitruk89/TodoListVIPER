@@ -18,12 +18,12 @@ final class MainViewController: UIViewController {
     
     private let searchBar: UISearchBar = {
         let bar = UISearchBar()
-        bar.placeholder = "Search"
-        bar.searchBarStyle = .default
+        bar.placeholder = DSSearchBar.placeholder
+        bar.searchBarStyle = DSSearchBar.style
         bar.translatesAutoresizingMaskIntoConstraints = false
         
         if let textField = bar.value(forKey: "searchField") as? UITextField {
-            textField.textColor = .label
+            textField.textColor = DSSearchBar.textColor
         }
         return bar
     }()
@@ -48,43 +48,20 @@ final class MainViewController: UIViewController {
         
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .black
+        appearance.backgroundColor = DSColor.black
         
         appearance.titleTextAttributes = [
-            .foregroundColor: UIColor.white
+            .foregroundColor: DSColor.primaryText
         ]
         
         appearance.largeTitleTextAttributes = [
-            .foregroundColor: UIColor.white
+            .foregroundColor: DSColor.primaryText
         ]
         
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
         navigationController?.navigationBar.compactAppearance = appearance
-        navigationController?.navigationBar.tintColor = .systemYellow
-    }
-    
-    private func makeContextMenu(for todo: AppTodo) -> UIMenu {
-        let edit = UIAction(title: "Редактировать",
-                            image: UIImage(systemName: "pencil")) { _ in
-            print("Edit tapped")
-            // TODO: presenter.edit(todo)
-        }
-        
-        let share = UIAction(title: "Поделиться",
-                             image: UIImage(systemName: "square.and.arrow.up")) { _ in
-            print("Share tapped")
-            // TODO: presenter.share(todo)
-        }
-        
-        let delete = UIAction(title: "Удалить",
-                              image: UIImage(systemName: "trash"),
-                              attributes: .destructive) { _ in
-            print("Delete tapped")
-            // TODO: presenter.delete(todo)
-        }
-        
-        return UIMenu(title: "", children: [edit, share, delete])
+        navigationController?.navigationBar.tintColor = DSColor.tint
     }
     
     private func setupViewsAndConstraints() {
@@ -92,29 +69,28 @@ final class MainViewController: UIViewController {
         
         tableView.register(TodoTableViewCell.self, forCellReuseIdentifier: TodoTableViewCell.reuseIdentifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(tableView)
-        
         tableView.dataSource = self
         tableView.delegate = self
-        
         tableView.rowHeight = UITableView.automaticDimension
         tableView.separatorStyle = .singleLine
-        tableView.separatorColor = UIColor.lightGray
-        tableView.backgroundColor = .systemBackground
+        tableView.separatorColor = DSColor.secondaryText
+        tableView.backgroundColor = DSColor.darkBackground
+        view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            searchBar.heightAnchor.constraint(equalToConstant: 36),
+            searchBar.heightAnchor.constraint(equalToConstant: DSSearchBar.height),
             
-            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 16),
+            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: DSSpacing.vertical),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 }
+
 
 extension MainViewController: MainViewProtocol {
     func showTodos(_ todos: [AppTodo]) {
@@ -149,6 +125,29 @@ extension MainViewController: UITableViewDataSource {
 }
 
 extension MainViewController: UITableViewDelegate {
+    
+    private func makeContextMenu(for todo: AppTodo) -> UIMenu {
+        let edit = UIAction(title: DSContextMenu.editTitle,
+                            image: DSContextMenu.editImage) { _ in
+            print("Edit tapped")
+            // TODO: presenter.edit(todo)
+        }
+        
+        let share = UIAction(title: DSContextMenu.shareTitle,
+                             image: DSContextMenu.shareImage) { _ in
+            print("Share tapped")
+            // TODO: presenter.share(todo)
+        }
+        
+        let delete = UIAction(title: DSContextMenu.deleteTitle,
+                              image: DSContextMenu.deleteImage,
+                              attributes: DSContextMenu.deleteAttributes) { _ in
+            print("Delete tapped")
+            // TODO: presenter.delete(todo)
+        }
+        
+        return UIMenu(title: "", children: [edit, share, delete])
+    }
 
     func tableView(_ tableView: UITableView,
                    contextMenuConfigurationForRowAt indexPath: IndexPath,
@@ -160,29 +159,5 @@ extension MainViewController: UITableViewDelegate {
         return .withPreview(preview) {
             self.makeContextMenu(for: todo)
         }
-    }
-}
-
-extension UIContextMenuConfiguration {
-    static func withPreview(_ view: UIView,
-                            actions: @escaping () -> UIMenu) -> UIContextMenuConfiguration {
-        return UIContextMenuConfiguration(identifier: nil,
-                                          previewProvider: {
-            let vc = UIViewController()
-            vc.view.addSubview(view)
-            view.translatesAutoresizingMaskIntoConstraints = false
-            vc.view.backgroundColor = .black
-            
-            NSLayoutConstraint.activate([
-                view.leadingAnchor.constraint(equalTo: vc.view.leadingAnchor),
-                view.trailingAnchor.constraint(equalTo: vc.view.trailingAnchor),
-                view.topAnchor.constraint(equalTo: vc.view.topAnchor),
-                view.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor)
-            ])
-            
-            vc.preferredContentSize = CGSize(width: UIView.noIntrinsicMetric, height: 100)
-            
-            return vc
-        }, actionProvider: { _ in actions() })
     }
 }
