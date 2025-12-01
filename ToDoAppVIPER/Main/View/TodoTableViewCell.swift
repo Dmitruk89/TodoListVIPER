@@ -90,10 +90,7 @@ final class TodoTableViewCell: UITableViewCell {
     func configure(with todo: AppTodo) {
         titleLabel.text = todo.title
         detailLabel.text = todo.description
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MM/dd/yy"
-        dateLabel.text = dateFormatter.string(from: todo.createdAt)
+        dateLabel.text = DateUtility.formatShortDate(todo.createdAt)
         
         if todo.completed {
             statusIndicator.image = UIImage(systemName: "checkmark.circle")

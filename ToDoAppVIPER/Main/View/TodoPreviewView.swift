@@ -53,9 +53,6 @@ final class TodoPreviewView: UIView {
     private func configure(_ todo: AppTodo) {
         titleLabel.text = todo.title
         detailLabel.text = todo.description
-
-        let df = DateFormatter()
-        df.dateFormat = "MM/dd/yy"
-        dateLabel.text = df.string(from: todo.createdAt)
+        dateLabel.text = DateUtility.formatShortDate(todo.createdAt)
     }
 }
