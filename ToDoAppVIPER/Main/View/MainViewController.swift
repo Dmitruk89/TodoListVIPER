@@ -173,9 +173,6 @@ extension MainViewController: TodoTableViewCellDelegate {
         var updatedTodo = oldTodo
         updatedTodo.completed.toggle()
 
-        todos[indexPath.row] = updatedTodo
-        cell.configure(with: updatedTodo)
-
         presenter.updateTodo(updatedTodo)
     }
 }

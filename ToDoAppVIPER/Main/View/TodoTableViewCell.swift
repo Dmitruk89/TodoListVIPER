@@ -96,13 +96,32 @@ final class TodoTableViewCell: UITableViewCell {
     }
     
     func configure(with todo: AppTodo) {
-        titleLabel.text = todo.title
-        detailLabel.text = todo.description
-        dateLabel.text = DateUtility.formatShortDate(todo.createdAt)
+        currentTodo = todo
+
+        let isDone = todo.completed
         
+        var titleAttributes: [NSAttributedString.Key: Any] = [
+            .font: DSTodoCell.titleFont,
+            .foregroundColor: isDone ? DSTodoCell.titleCompletedColor : DSTodoCell.titleColor
+        ]
+        
+        if isDone {
+            titleAttributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+        } else {
+            titleAttributes[.strikethroughStyle] = NSUnderlineStyle().rawValue
+        }
+        
+        titleLabel.attributedText = NSAttributedString(string: todo.title, attributes: titleAttributes)
+
+        detailLabel.textColor = isDone ? DSTodoCell.detailCompletedColor : DSTodoCell.detailColor
+        detailLabel.font = DSTodoCell.detailFont
+        detailLabel.text = todo.description
+
+        dateLabel.text = DateUtility.formatShortDate(todo.createdAt)
+
         let statusImageName = todo.completed ? DSStatusIcon.completed : DSStatusIcon.pending
         statusIndicator.image = UIImage(systemName: statusImageName)
-        currentTodo = todo
+        statusIndicator.tintColor = DSTodoCell.iconTint
     }
     
     override func prepareForReuse() {
