@@ -7,21 +7,25 @@
 
 import Foundation
 import CoreData
+import Combine
 
 public protocol CoreDataServiceProtocol {
     func isEmpty(completion: @escaping (Bool) -> Void)
-    
     func fetchTodos(completion: @escaping (Result<[AppTodo], Error>) -> Void)
-    
     func saveTodosFromAPI(_ apiTodos: [ApiTodo], completion: @escaping (Result<Void, Error>) -> Void)
-    
     func updateTodo(_ todo: AppTodo, completion: @escaping (Result<AppTodo, Error>) -> Void)
+    var changesPublisher: AnyPublisher<Void, Never> { get }
 }
 
 public final class CoreDataService: CoreDataServiceProtocol {
     public static let shared = CoreDataService(modelName: "CDModel")
     
     private let container: NSPersistentContainer
+    
+    private var changesSubject = PassthroughSubject<Void, Never>()
+    public var changesPublisher: AnyPublisher<Void, Never> {
+            changesSubject.eraseToAnyPublisher()
+        }
     
     public init(modelName: String) {
         container = NSPersistentContainer(name: modelName)
@@ -31,6 +35,14 @@ public final class CoreDataService: CoreDataServiceProtocol {
             }
         }
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        
+        NotificationCenter.default.addObserver(
+            forName: .NSManagedObjectContextObjectsDidChange,
+            object: container.viewContext,
+            queue: .main
+        ) { [weak self] _ in
+            self?.changesSubject.send(())
+        }
     }
     
     public func isEmpty(completion: @escaping (Bool) -> Void) {
@@ -114,6 +126,7 @@ public final class CoreDataService: CoreDataServiceProtocol {
                 let updated = entity.toAppTodo()
 
                 DispatchQueue.main.async {
+                    self.changesSubject.send(())
                     completion(.success(updated))
                 }
 

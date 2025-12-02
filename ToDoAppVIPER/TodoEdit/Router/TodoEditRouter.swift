@@ -9,6 +9,4 @@ protocol TodoEditRouterInput: AnyObject {}
 
 import UIKit
 
-final class TodoEditRouter: TodoEditRouterInput {
-    weak var viewController: UIViewController?
-}
+final class TodoEditRouter: TodoEditRouterInput {}

@@ -10,15 +10,17 @@ import UIKit
 
 final class TodoEditModuleBuilder {
     static func build(with todo: AppTodo) -> UIViewController {
+        
         let view = TodoEditViewController()
-        let router = TodoEditRouter()
+        let presenter = TodoEditPresenter(todo: todo)
         let interactor = TodoEditInteractor()
-        let presenter = TodoEditPresenter(todo: todo, interactor: interactor, router: router)
+        let router = TodoEditRouter()
         
         view.presenter = presenter
         presenter.view = view
+        presenter.interactor = interactor
+        presenter.router = router
         interactor.output = presenter
-        router.viewController = view
         
         return view
     }

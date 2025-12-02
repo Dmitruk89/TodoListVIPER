@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 protocol MainInteractorProtocol {
     func loadTodos()
@@ -22,6 +23,8 @@ protocol MainInteractorOutput: AnyObject {
 
 final class MainInteractor: MainInteractorProtocol {
     
+    private var cancellables = Set<AnyCancellable>()
+    
     weak var output: MainInteractorOutput?
     
     private let apiService: TodoAPIServiceProtocol
@@ -31,6 +34,8 @@ final class MainInteractor: MainInteractorProtocol {
          coreData: CoreDataServiceProtocol = CoreDataService.shared) {
         self.apiService = apiService
         self.coreData = coreData
+        
+        subscribeToCoreDataUpdates()
     }
     
     func loadTodos() {
@@ -39,6 +44,15 @@ final class MainInteractor: MainInteractorProtocol {
         } else {
             self.loadFromCoreData()
         }
+    }
+    
+    private func subscribeToCoreDataUpdates() {
+        coreData.changesPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.loadFromCoreData()
+            }
+            .store(in: &cancellables)
     }
     
     private func loadFromCoreData() {

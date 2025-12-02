@@ -7,27 +7,32 @@
 
 protocol TodoEditViewOutput: AnyObject {
     func viewDidLoad()
+    func updateDescription(_ todo: AppTodo)
 }
 
 import Foundation
 
 final class TodoEditPresenter: TodoEditViewOutput, TodoEditInteractorOutput {
-
+    
     weak var view: TodoEditViewInput?
-    private let interactor: TodoEditInteractorInput
-    private let router: TodoEditRouterInput
+    var interactor: TodoEditInteractorInput!
+    var router: TodoEditRouterInput!
     
     private let todo: AppTodo
-
-    init(todo: AppTodo,
-         interactor: TodoEditInteractorInput,
-         router: TodoEditRouterInput) {
+    
+    init(todo: AppTodo) {
         self.todo = todo
-        self.interactor = interactor
-        self.router = router
     }
-
+    
     func viewDidLoad() {
         view?.display(todo: todo)
+    }
+    
+    func updateDescription(_ todo: AppTodo) {
+        interactor.updateTodo(todo)
+    }
+    
+    func didFail(_ error: String) {
+        print("Update failed: \(error)")
     }
 }
