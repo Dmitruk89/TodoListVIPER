@@ -20,6 +20,7 @@ final class MainViewController: UIViewController {
     
     private let searchBarView = TodoSearchBarView()
     private let tableView = UITableView()
+    private let bottomBarView = BottomBarView()
     private var todos: [AppTodo] = []
     
     private var cancellables = Set<AnyCancellable>()
@@ -37,7 +38,11 @@ final class MainViewController: UIViewController {
         setupNavigationBarAppearance()
         setupViewsAndConstraints()
         bind()
+        
         searchBarView.delegate = self
+        bottomBarView.delegate = self
+        
+        presenter.viewDidLoad()
         presenter.viewDidLoad()
     }
     
@@ -73,6 +78,9 @@ final class MainViewController: UIViewController {
     private func setupViewsAndConstraints() {
         view.addSubview(searchBarView)
         
+        view.addSubview(bottomBarView)
+        bottomBarView.translatesAutoresizingMaskIntoConstraints = false
+        
         tableView.register(TodoTableViewCell.self, forCellReuseIdentifier: TodoTableViewCell.reuseIdentifier)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
@@ -93,7 +101,12 @@ final class MainViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: searchBarView.bottomAnchor, constant: DSMainView.Layout.tableTopInset),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: bottomBarView.topAnchor),
+            
+            bottomBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bottomBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomBarView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            bottomBarView.heightAnchor.constraint(equalToConstant: DSBottomBar.height)
         ])
     }
 }
@@ -102,6 +115,7 @@ extension MainViewController: MainViewProtocol {
     func showTodos(_ todos: [AppTodo]) {
         self.todos = todos
         tableView.reloadData()
+        updateBottomBar()
     }
     
     func showError(_ message: String) {
@@ -113,6 +127,11 @@ extension MainViewController: MainViewProtocol {
         todos[index] = todo
         tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
     }
+    
+    private func updateBottomBar() {
+        bottomBarView.configure(with: todos.count)
+    }
+    
 }
 
 extension MainViewController: TodoSearchBarDelegate {
@@ -188,5 +207,11 @@ extension MainViewController: TodoTableViewCellDelegate {
         updatedTodo.completed.toggle()
 
         presenter.updateTodo(updatedTodo)
+    }
+}
+
+extension MainViewController: BottomBarViewDelegate {
+    func didTapNewTodoButton() {
+        print("New todo")
     }
 }
