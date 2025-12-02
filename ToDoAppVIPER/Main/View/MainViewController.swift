@@ -28,10 +28,11 @@ final class MainViewController: UIViewController {
         super.viewDidLoad()
         
         overrideUserInterfaceStyle = .dark
-        title = "Задачи"
-        
-        navigationItem.backButtonDisplayMode = .default
-        navigationItem.backButtonTitle = "Назад"
+        title = DSMainView.Navigation.title
+
+        let backItem = UIBarButtonItem()
+        backItem.title = DSMainView.Navigation.backButtonTitle
+        navigationItem.backBarButtonItem = backItem
         
         setupNavigationBarAppearance()
         setupViewsAndConstraints()
@@ -76,19 +77,20 @@ final class MainViewController: UIViewController {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.separatorStyle = .singleLine
-        tableView.separatorColor = DSColor.secondaryText
-        tableView.backgroundColor = DSColor.darkBackground
+        
+        tableView.rowHeight = DSMainView.TableView.rowHeight
+        tableView.separatorStyle = DSMainView.TableView.separatorStyle
+        tableView.separatorColor = DSMainView.Colors.separator
+        tableView.backgroundColor = DSMainView.Colors.tableBackground
+        
         view.addSubview(tableView)
         
         NSLayoutConstraint.activate([
             searchBarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             searchBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             searchBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            searchBarView.heightAnchor.constraint(equalToConstant: DSSearchBar.height),
             
-            tableView.topAnchor.constraint(equalTo: searchBarView.bottomAnchor, constant: DSSpacing.vertical),
+            tableView.topAnchor.constraint(equalTo: searchBarView.bottomAnchor, constant: DSMainView.Layout.tableTopInset),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
