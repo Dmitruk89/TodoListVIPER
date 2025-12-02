@@ -11,6 +11,7 @@ import Combine
 protocol MainInteractorProtocol {
     func loadTodos()
     func updateTodo(_ todo: AppTodo)
+    func deleteTodo(_ todo: AppTodo)
 }
 
 protocol MainInteractorOutput: AnyObject {
@@ -19,6 +20,9 @@ protocol MainInteractorOutput: AnyObject {
     
     func didUpdateTodo(_ todo: AppTodo)
     func didFailUpdatingTodo(_ error: String)
+    
+    func didDeleteTodo(_ todo: AppTodo)
+    func didFailDeletingTodo(_ error: String)
 }
 
 final class MainInteractor: MainInteractorProtocol {
@@ -94,6 +98,17 @@ final class MainInteractor: MainInteractorProtocol {
                 self?.output?.didUpdateTodo(updated)
             case .failure(let error):
                 self?.output?.didFailUpdatingTodo(error.localizedDescription)
+            }
+        }
+    }
+    
+    func deleteTodo(_ todo: AppTodo) {
+        coreData.deleteTodo(todo) { [weak self] result in
+            switch result {
+            case .success():
+                self?.output?.didDeleteTodo(todo)
+            case .failure(let error):
+                self?.output?.didFailDeletingTodo(error.localizedDescription)
             }
         }
     }

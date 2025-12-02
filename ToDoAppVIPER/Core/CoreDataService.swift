@@ -14,6 +14,7 @@ public protocol CoreDataServiceProtocol {
     func fetchTodos(completion: @escaping (Result<[AppTodo], Error>) -> Void)
     func saveTodosFromAPI(_ apiTodos: [ApiTodo], completion: @escaping (Result<Void, Error>) -> Void)
     func updateTodo(_ todo: AppTodo, completion: @escaping (Result<AppTodo, Error>) -> Void)
+    func deleteTodo(_ todo: AppTodo, completion: @escaping (Result<Void, Error>) -> Void)
     var changesPublisher: AnyPublisher<Void, Never> { get }
 }
 
@@ -24,8 +25,8 @@ public final class CoreDataService: CoreDataServiceProtocol {
     
     private var changesSubject = PassthroughSubject<Void, Never>()
     public var changesPublisher: AnyPublisher<Void, Never> {
-            changesSubject.eraseToAnyPublisher()
-        }
+        changesSubject.eraseToAnyPublisher()
+    }
     
     public init(modelName: String) {
         container = NSPersistentContainer(name: modelName)
@@ -129,7 +130,36 @@ public final class CoreDataService: CoreDataServiceProtocol {
                     self.changesSubject.send(())
                     completion(.success(updated))
                 }
-
+                
+            } catch {
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+    
+    public func deleteTodo(_ todo: AppTodo, completion: @escaping (Result<Void, Error>) -> Void) {
+        container.performBackgroundTask { bgContext in
+            let fetch: NSFetchRequest<TodoEntity> = TodoEntity.fetchRequest()
+            fetch.predicate = NSPredicate(format: "id == %d", todo.id)
+            fetch.fetchLimit = 1
+            
+            do {
+                guard let entity = try bgContext.fetch(fetch).first else {
+                    let err = NSError(domain: "CoreData", code: 404,
+                                      userInfo: [NSLocalizedDescriptionKey: "Todo not found"])
+                    DispatchQueue.main.async { completion(.failure(err)) }
+                    return
+                }
+                
+                bgContext.delete(entity)
+                try bgContext.save()
+                
+                DispatchQueue.main.async {
+                    self.changesSubject.send(())
+                    completion(.success(()))
+                }
             } catch {
                 DispatchQueue.main.async {
                     completion(.failure(error))

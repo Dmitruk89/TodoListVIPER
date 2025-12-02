@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 protocol MainViewProtocol: AnyObject {
     func showTodos(_ todos: [AppTodo])
@@ -21,6 +22,8 @@ final class MainViewController: UIViewController {
     private let tableView = UITableView()
     private var todos: [AppTodo] = []
     
+    private var cancellables = Set<AnyCancellable>()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -32,8 +35,17 @@ final class MainViewController: UIViewController {
         
         setupNavigationBarAppearance()
         setupViewsAndConstraints()
+        bind()
         searchBarView.delegate = self
         presenter.viewDidLoad()
+    }
+    
+    private func bind() {
+        CoreDataService.shared.changesPublisher
+            .sink { [weak self] in
+                self?.presenter.viewDidLoad()
+            }
+            .store(in: &cancellables)
     }
     
     private func setupNavigationBarAppearance() {
@@ -83,7 +95,6 @@ final class MainViewController: UIViewController {
         ])
     }
 }
-
 
 extension MainViewController: MainViewProtocol {
     func showTodos(_ todos: [AppTodo]) {
@@ -146,8 +157,7 @@ extension MainViewController: UITableViewDelegate {
         let delete = UIAction(title: DSContextMenu.deleteTitle,
                               image: DSContextMenu.deleteImage,
                               attributes: DSContextMenu.deleteAttributes) { _ in
-            print("Delete tapped")
-            // TODO: presenter.delete(todo)
+            self.presenter.deleteTodo(todo)
         }
         
         return UIMenu(title: "", children: [edit, share, delete])

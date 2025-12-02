@@ -10,6 +10,7 @@ protocol MainPresenterProtocol: AnyObject {
     func filterTodos(with query: String)
     func updateTodo(_ todo: AppTodo)
     func edit(_ todo: AppTodo)
+    func deleteTodo(_ todo: AppTodo)
 }
 
 final class MainPresenter: MainPresenterProtocol {
@@ -40,6 +41,10 @@ final class MainPresenter: MainPresenterProtocol {
     
     func updateTodo(_ todo: AppTodo) {
         interactor.updateTodo(todo)
+    }
+    
+    func deleteTodo(_ todo: AppTodo) {
+        interactor.deleteTodo(todo)
     }
     
     func filterTodos(with query: String) {
@@ -78,6 +83,12 @@ extension MainPresenter: MainInteractorOutput {
     }
     
     func didFailUpdatingTodo(_ error: String) {
+        view?.showError(error)
+    }
+    
+    func didDeleteTodo(_ todo: AppTodo) {}
+    
+    func didFailDeletingTodo(_ error: String) {
         view?.showError(error)
     }
 }
