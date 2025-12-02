@@ -9,12 +9,12 @@ import UIKit
 
 enum DSContextMenu {
     static let editTitle = "Редактировать"
-    static let editImage = UIImage(systemName: "pencil")
+    static let editImage = UIImage(named: "ds_edit")
     
     static let shareTitle = "Поделиться"
-    static let shareImage = UIImage(systemName: "square.and.arrow.up")
+    static let shareImage = UIImage(named: "ds_share")
     
     static let deleteTitle = "Удалить"
-    static let deleteImage = UIImage(systemName: "trash")
+    static let deleteImage = UIImage(named: "ds_delete")
     static let deleteAttributes: UIMenuElement.Attributes = .destructive
 }
