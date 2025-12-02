@@ -8,6 +8,7 @@
 protocol MainPresenterProtocol: AnyObject {
     func viewDidLoad()
     func filterTodos(with query: String)
+    func createTodo()
     func updateTodo(_ todo: AppTodo)
     func edit(_ todo: AppTodo)
     func deleteTodo(_ todo: AppTodo)
@@ -37,6 +38,10 @@ final class MainPresenter: MainPresenterProtocol {
 
     func viewDidLoad() {
         interactor.loadTodos()
+    }
+    
+    func createTodo() {
+        interactor.createTodo()
     }
     
     func updateTodo(_ todo: AppTodo) {
@@ -89,6 +94,14 @@ extension MainPresenter: MainInteractorOutput {
     func didDeleteTodo(_ todo: AppTodo) {}
     
     func didFailDeletingTodo(_ error: String) {
+        view?.showError(error)
+    }
+    
+    func didCreateTodo(_ todo: AppTodo) {
+        router.openTodoEdit(todo)
+    }
+    
+    func didFailCreatingTodo(_ error: String) {
         view?.showError(error)
     }
 }

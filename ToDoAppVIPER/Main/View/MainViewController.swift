@@ -212,6 +212,6 @@ extension MainViewController: TodoTableViewCellDelegate {
 
 extension MainViewController: BottomBarViewDelegate {
     func didTapNewTodoButton() {
-        print("New todo")
+        presenter.createTodo()
     }
 }

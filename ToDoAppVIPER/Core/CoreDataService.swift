@@ -13,6 +13,7 @@ public protocol CoreDataServiceProtocol {
     func isEmpty(completion: @escaping (Bool) -> Void)
     func fetchTodos(completion: @escaping (Result<[AppTodo], Error>) -> Void)
     func saveTodosFromAPI(_ apiTodos: [ApiTodo], completion: @escaping (Result<Void, Error>) -> Void)
+    func createNewTodo(completion: @escaping (Result<AppTodo, Error>) -> Void)
     func updateTodo(_ todo: AppTodo, completion: @escaping (Result<AppTodo, Error>) -> Void)
     func deleteTodo(_ todo: AppTodo, completion: @escaping (Result<Void, Error>) -> Void)
     var changesPublisher: AnyPublisher<Void, Never> { get }
@@ -102,6 +103,35 @@ public final class CoreDataService: CoreDataServiceProtocol {
         }
     }
     
+    public func createNewTodo(completion: @escaping (Result<AppTodo, Error>) -> Void) {
+
+        container.performBackgroundTask { bgContext in
+            let entity = TodoEntity(context: bgContext)
+
+            entity.id = Int64(Date().timeIntervalSince1970)
+            entity.title = "Новая задача"
+            entity.desc = ""
+            entity.completed = false
+            entity.createdAt = Date()
+
+            do {
+                try bgContext.save()
+
+                let saved = entity.toAppTodo()
+
+                DispatchQueue.main.async {
+                    self.changesSubject.send(())
+                    completion(.success(saved))
+                }
+
+            } catch {
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+
     public func updateTodo(_ todo: AppTodo, completion: @escaping (Result<AppTodo, Error>) -> Void) {
         
         container.performBackgroundTask { bgContext in
