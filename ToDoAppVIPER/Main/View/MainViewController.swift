@@ -27,6 +27,9 @@ final class MainViewController: UIViewController {
         overrideUserInterfaceStyle = .dark
         title = "Задачи"
         
+        navigationItem.backButtonDisplayMode = .default
+        navigationItem.backButtonTitle = "Назад"
+        
         setupNavigationBarAppearance()
         setupViewsAndConstraints()
         searchBarView.delegate = self
@@ -131,8 +134,7 @@ extension MainViewController: UITableViewDelegate {
     private func makeContextMenu(for todo: AppTodo) -> UIMenu {
         let edit = UIAction(title: DSContextMenu.editTitle,
                             image: DSContextMenu.editImage) { _ in
-            print("Edit tapped")
-            // TODO: presenter.edit(todo)
+            self.presenter.edit(todo)
         }
         
         let share = UIAction(title: DSContextMenu.shareTitle,

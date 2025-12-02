@@ -9,6 +9,7 @@ protocol MainPresenterProtocol: AnyObject {
     func viewDidLoad()
     func filterTodos(with query: String)
     func updateTodo(_ todo: AppTodo)
+    func edit(_ todo: AppTodo)
 }
 
 final class MainPresenter: MainPresenterProtocol {
@@ -27,6 +28,10 @@ final class MainPresenter: MainPresenterProtocol {
         self.view = view
         self.interactor = interactor
         self.router = router
+    }
+    
+    func edit(_ todo: AppTodo) {
+        router.openTodoEdit(todo)
     }
 
     func viewDidLoad() {
