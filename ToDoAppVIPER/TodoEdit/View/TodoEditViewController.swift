@@ -7,6 +7,7 @@
 
 
 import UIKit
+import Combine
 
 protocol TodoEditViewInput: AnyObject {
     func display(todo: AppTodo)
@@ -16,6 +17,11 @@ final class TodoEditViewController: UIViewController, TodoEditViewInput {
     
     var presenter: TodoEditViewOutput!
     
+    private let titleChanges = PassthroughSubject<AppTodo, Never>()
+    private let descriptionChanges = PassthroughSubject<AppTodo, Never>()
+    private var cancellables = Set<AnyCancellable>()
+    
+    private let titleTextView = UITextView()
     private let dateLabel = UILabel()
     private let textView = UITextView()
     
@@ -27,13 +33,14 @@ final class TodoEditViewController: UIViewController, TodoEditViewInput {
         overrideUserInterfaceStyle = .dark
         
         setupUI()
+        bindTextChanges()
         presenter.viewDidLoad()
     }
     
     func display(todo: AppTodo) {
         currentTodo = todo
 
-        title = todo.title
+        titleTextView.text = todo.title
         dateLabel.text = DateUtility.formatShortDate(todo.createdAt)
 
         textView.text = todo.description
@@ -44,8 +51,33 @@ final class TodoEditViewController: UIViewController, TodoEditViewInput {
         }
     }
     
+    private func bindTextChanges() {
+        titleChanges
+            .debounce(for: .milliseconds(600), scheduler: RunLoop.main)
+            .sink { [weak self] todo in
+                self?.presenter.updateTodo(todo)
+            }
+            .store(in: &cancellables)
+
+        descriptionChanges
+            .debounce(for: .milliseconds(600), scheduler: RunLoop.main)
+            .sink { [weak self] todo in
+                self?.presenter.updateTodo(todo)
+            }
+            .store(in: &cancellables)
+    }
+    
     private func setupUI() {
         view.backgroundColor = DSTodoEditView.viewBackgroundColor
+        
+        titleTextView.font = DSTodoEditView.TitleTextView.font
+        titleTextView.textColor = DSTodoEditView.TitleTextView.textColor
+        titleTextView.backgroundColor = DSTodoEditView.TitleTextView.backgroundColor
+        titleTextView.isScrollEnabled = DSTodoEditView.TitleTextView.isScrollEnabled
+        titleTextView.delegate = self
+        titleTextView.textContainerInset = .zero
+        titleTextView.textContainer.lineFragmentPadding = 0
+        titleTextView.isScrollEnabled = false
         
         dateLabel.font = DSTodoEditView.DateLabel.font
         dateLabel.textColor = DSTodoEditView.DateLabel.textColor
@@ -57,7 +89,7 @@ final class TodoEditViewController: UIViewController, TodoEditViewInput {
         textView.delegate = self
         textView.isScrollEnabled = DSTodoEditView.DescriptionTextView.isScrollEnabled
         
-        let stack = UIStackView(arrangedSubviews: [dateLabel, textView])
+        let stack = UIStackView(arrangedSubviews: [titleTextView, dateLabel, textView])
         stack.axis = .vertical
         stack.spacing = DSTodoEditView.stackSpacing
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -67,7 +99,7 @@ final class TodoEditViewController: UIViewController, TodoEditViewInput {
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: DSTodoEditView.horizontalPadding),
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -DSTodoEditView.horizontalPadding),
-            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: DSTodoEditView.topPadding),
+            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             textView.heightAnchor.constraint(greaterThanOrEqualToConstant: DSTodoEditView.textViewMinHeight)
         ])
     }
@@ -81,7 +113,15 @@ final class TodoEditViewController: UIViewController, TodoEditViewInput {
 extension TodoEditViewController: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         guard var todo = currentTodo else { return }
-        todo.description = textView.text
-        presenter.updateDescription(todo)
+
+        if textView === titleTextView {
+            todo.title = textView.text
+            currentTodo = todo
+            titleChanges.send(todo)
+        } else if textView === self.textView {
+            todo.description = textView.text
+            currentTodo = todo
+            descriptionChanges.send(todo)
+        }
     }
 }

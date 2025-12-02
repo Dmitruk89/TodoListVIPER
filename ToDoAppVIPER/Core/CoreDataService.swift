@@ -69,7 +69,7 @@ public final class CoreDataService: CoreDataServiceProtocol {
         let ctx = container.viewContext
         ctx.perform {
             let request: NSFetchRequest<TodoEntity> = TodoEntity.fetchRequest()
-            request.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true)]
+            request.sortDescriptors = [NSSortDescriptor(key: "id", ascending: false)]
             do {
                 let entities = try ctx.fetch(request)
                 let todos = entities.map { $0.toAppTodo() }

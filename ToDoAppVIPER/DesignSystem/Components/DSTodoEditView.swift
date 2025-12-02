@@ -12,8 +12,16 @@ enum DSTodoEditView {
     // MARK: - Spacing
     static let stackSpacing: CGFloat = DSSpacing.vertical
     static let horizontalPadding: CGFloat = DSSpacing.horizontal
-    static let topPadding: CGFloat = DSSpacing.large
+    static let topPadding: CGFloat = 30
     static let textViewMinHeight: CGFloat = 200
+    
+    // MARK: - Title Label
+    enum TitleTextView {
+        static let font: UIFont = DSTypography.viewTitle
+        static let textColor: UIColor = DSColor.primaryText
+        static let backgroundColor: UIColor = .clear
+        static let isScrollEnabled: Bool = false
+    }
     
     // MARK: - Date Label
     enum DateLabel {
@@ -24,7 +32,7 @@ enum DSTodoEditView {
     
     // MARK: - TextView
     enum DescriptionTextView {
-        static let font: UIFont = DSTypography.subheadline
+        static let font: UIFont = DSTypography.viewDescription
         static let textColor: UIColor = DSColor.primaryText
         static let backgroundColor: UIColor = .clear
         static let isScrollEnabled: Bool = true

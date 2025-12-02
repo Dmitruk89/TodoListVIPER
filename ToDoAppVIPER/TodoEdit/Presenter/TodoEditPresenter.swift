@@ -7,7 +7,7 @@
 
 protocol TodoEditViewOutput: AnyObject {
     func viewDidLoad()
-    func updateDescription(_ todo: AppTodo)
+    func updateTodo(_ todo: AppTodo)
 }
 
 import Foundation
@@ -28,7 +28,7 @@ final class TodoEditPresenter: TodoEditViewOutput, TodoEditInteractorOutput {
         view?.display(todo: todo)
     }
     
-    func updateDescription(_ todo: AppTodo) {
+    func updateTodo(_ todo: AppTodo) {
         interactor.updateTodo(todo)
     }
     
