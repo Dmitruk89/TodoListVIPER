@@ -25,7 +25,6 @@ final class TodoEditViewController: UIViewController, TodoEditViewInput {
         super.viewDidLoad()
         
         overrideUserInterfaceStyle = .dark
-        view.backgroundColor = DSColor.darkBackground
         
         setupUI()
         presenter.viewDidLoad()
@@ -46,31 +45,32 @@ final class TodoEditViewController: UIViewController, TodoEditViewInput {
     }
     
     private func setupUI() {
-        dateLabel.font = DSTypography.footnote
-        dateLabel.textColor = DSColor.secondaryText
-        dateLabel.numberOfLines = 0
+        view.backgroundColor = DSTodoEditView.viewBackgroundColor
+        
+        dateLabel.font = DSTodoEditView.DateLabel.font
+        dateLabel.textColor = DSTodoEditView.DateLabel.textColor
+        dateLabel.numberOfLines = DSTodoEditView.DateLabel.numberOfLines
 
-        textView.font = DSTypography.subheadline
-        textView.textColor = DSColor.primaryText
-        textView.backgroundColor = .clear
+        textView.font = DSTodoEditView.DescriptionTextView.font
+        textView.textColor = DSTodoEditView.DescriptionTextView.textColor
+        textView.backgroundColor = DSTodoEditView.DescriptionTextView.backgroundColor
         textView.delegate = self
-        textView.isScrollEnabled = true
+        textView.isScrollEnabled = DSTodoEditView.DescriptionTextView.isScrollEnabled
         
         let stack = UIStackView(arrangedSubviews: [dateLabel, textView])
         stack.axis = .vertical
-        stack.spacing = DSSpacing.vertical
+        stack.spacing = DSTodoEditView.stackSpacing
         stack.translatesAutoresizingMaskIntoConstraints = false
         
         view.addSubview(stack)
         
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: DSSpacing.horizontal),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -DSSpacing.horizontal),
-            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: DSSpacing.large),
-            textView.heightAnchor.constraint(greaterThanOrEqualToConstant: 200)
+            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: DSTodoEditView.horizontalPadding),
+            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -DSTodoEditView.horizontalPadding),
+            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: DSTodoEditView.topPadding),
+            textView.heightAnchor.constraint(greaterThanOrEqualToConstant: DSTodoEditView.textViewMinHeight)
         ])
     }
-    
     
     private func placeCursorAtEnd() {
         let endPosition = textView.endOfDocument
